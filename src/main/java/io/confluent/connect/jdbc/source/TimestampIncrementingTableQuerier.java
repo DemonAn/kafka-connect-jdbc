@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -203,7 +204,12 @@ public class TimestampIncrementingTableQuerier extends TableQuerier {
   TimestampIncrementingOffset extractOffset(Schema schema, Struct record) {
     final Timestamp extractedTimestamp;
     if (timestampColumn != null) {
-      extractedTimestamp = (Timestamp) record.get(timestampColumn);
+      Object obj = record.get(timestampColumn);
+      if ((obj instanceof Date))
+        extractedTimestamp = new Timestamp(((Date)obj).getTime());
+      else {
+        extractedTimestamp = (Timestamp)obj;
+      }
       Timestamp timestampOffset = offset.getTimestampOffset();
       assert timestampOffset != null && timestampOffset.compareTo(extractedTimestamp) <= 0;
     } else {
